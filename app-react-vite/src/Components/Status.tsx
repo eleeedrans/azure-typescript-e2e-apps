@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-let url = `/api/status`;
+let url = `/getall`;
 
 const cloudEnv = import.meta.env.VITE_CLOUD_ENV;
 const backendEnv = import.meta.env.VITE_BACKEND_URI;
@@ -30,6 +30,7 @@ function Status({ user }:any) {
                 mountFlag.current = true;
                 const data = await fetch(url);
                 const json = await data.json();
+                console.log("json 4", json)
                 setEnvVars(json);
             }
         }
