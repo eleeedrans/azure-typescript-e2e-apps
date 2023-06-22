@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import Button from '@mui/material/Button';
 import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
 import NavBar from './Components/NavBar';
 import Status from './Components/Status';
@@ -25,44 +24,25 @@ console.log(`URL = ${url}`)
 
 function App() {
 
+  //mock grid data
+  const columns: GridColDef[] = [
+    { field: 'id', headerName: 'ID', width: 50, type: 'number' },
+    { field: 'projectName', headerName: 'projectName', width: 150 },
+    { field: 'appName', headerName: 'appName', width: 200 },
+    { field: 'repository', headerName: 'repository', width: 150 },
+    { field: 'scanSpeedOptions', headerName: 'scanSpeedOptions', width: 75 },
+    { field: 'execCountChangeType', headerName: 'execCountChangeType', width: 50, type: 'number' },
+    { field: 'scanType', headerName: 'scanType', width: 150 },
+    { field: 'execPipelineCount', headerName: 'execPipelineCount', type: 'number', width: 50 },
+  ];
+
+  let rows = []
+
   // auth
   const [isAuthenticated, userHasAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
   const [userName, setUserName] = useState('');
   const mountFlagAuth = useRef(false)
-
-  const columns: GridColDef[] = [
-    { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'firstName', headerName: 'First name', width: 130 },
-    { field: 'lastName', headerName: 'Last name', width: 130 },
-    {
-      field: 'age',
-      headerName: 'Age',
-      type: 'number',
-      width: 90,
-    },
-    {
-      field: 'fullName',
-      headerName: 'Full name',
-      description: 'This column has a value getter and is not sortable.',
-      sortable: false,
-      width: 160,
-      valueGetter: (params: GridValueGetterParams) =>
-        `${params.row.firstName || ''} ${params.row.lastName || ''}`,
-    },
-  ];
-  
-  const rows = [
-    { id: 1, lastName: 'Snow', firstName: 'Jon', age: 35 },
-    { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 42 },
-    { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 45 },
-    { id: 4, lastName: 'Stark', firstName: 'Arya', age: 16 },
-    { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: null },
-    { id: 6, lastName: 'Melisandre', firstName: null, age: 150 },
-    { id: 7, lastName: 'Clifford', firstName: 'Ferrara', age: 44 },
-    { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
-    { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
-  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -84,7 +64,7 @@ function App() {
   }, []);
 
   // data
-  const [todos, setTodos] = useState({});
+  const [todos, setTodos] = useState([]);
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
   const mountFlagData = useRef(false)
@@ -98,7 +78,7 @@ function App() {
         const data = await fetch(url);
         const json = await data.json();
         console.log("json 1", json)
-        setTodos(json);
+        setTodos(json.recordset);
       }
     }
 
@@ -137,30 +117,10 @@ function App() {
     <div className="App">
       <NavBar user={user} />
       <header className="App-header">
-        <form id="form1" className="App-form" onSubmit={e => sendDataToApi(e)}>
-          <div>
-            <input
-              type="text"
-              id="name"
-              className="App-input"
-              placeholder="Enter todo to add"
-              value={title}
-              onChange={e => setTitle(e.target.value)} />
-            <button type="submit" className="App-button">Submit</button>
-            <div>
-              <Button variant="contained">Hello World</Button>
-            </div>
-          </div>
-        </form>
         <div><h5>Todo added: {message} </h5></div>
-
-        <details>
-          <summary>Public data</summary>
-          <p><h5><pre>{JSON.stringify(todos, null, 2)}</pre></h5></p>
-        </details>
         <div style={{ height: 400, width: '100%' }}>
           <DataGrid
-            rows={rows}
+            rows={todos}
             columns={columns}
             initialState={{
               pagination: {
@@ -180,12 +140,9 @@ function App() {
                 <p><Status user={user} /></p>
               </p>
             </details>
-            <p>{JSON.stringify(user)}</p>
           </div>
           : <div>Sign in for private data access</div>
         }
-
-
       </header>
     </div>
   );

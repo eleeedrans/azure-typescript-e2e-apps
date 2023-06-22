@@ -32,7 +32,7 @@ function Status({ user }:any) {
                 const json = await data.json();
                 console.log("json 4", json)
                 setEnvVars(json);
-            }
+              }
         }
 
         fetchData();
