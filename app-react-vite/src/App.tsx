@@ -1,8 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
+import { DataGrid, GridActionsCellItem, GridColDef, GridRowId, GridRowModes, GridRowModesModel, GridValueGetterParams } from '@mui/x-data-grid';
 import NavBar from './Components/NavBar';
 import Status from './Components/Status';
+import * as React from 'react';
 import './App.css';
+import { FaSave } from 'react-icons/fa';
+import { FaBeer } from 'react-icons/fa';
+import { FaEdit } from 'react-icons/fa';
+import { FaTrash } from 'react-icons/fa';
 
 let url = `/getall`;
 
@@ -23,20 +28,86 @@ if (cloudEnv.toLowerCase()=='production') {
 console.log(`URL = ${url}`)
 
 function App() {
+  const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
+
+  const handleSaveClick = (id: GridRowId) => () => {
+    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
+  };
+  const handleCancelClick = (id: GridRowId) => () => {
+    setRowModesModel({
+      ...rowModesModel,
+      [id]: { mode: GridRowModes.View, ignoreModifications: true },
+    });
+
+    const editedRow = todos.find((row:any) => row.id === id);
+    if (editedRow != null) {
+      setTodos(todos.filter((row:any) => row.id !== id));
+    }
+  };
+  const handleEditClick = (id: GridRowId) => () => {
+    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
+  };
+  const handleDeleteClick = (id: GridRowId) => () => {
+    setTodos(todos.filter((row: any) => row.id !== id));
+  };
 
   //mock grid data
   const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 50, type: 'number' },
-    { field: 'projectName', headerName: 'projectName', width: 150 },
-    { field: 'appName', headerName: 'appName', width: 200 },
-    { field: 'repository', headerName: 'repository', width: 150 },
-    { field: 'scanSpeedOptions', headerName: 'scanSpeedOptions', width: 75 },
-    { field: 'execCountChangeType', headerName: 'execCountChangeType', width: 50, type: 'number' },
-    { field: 'scanType', headerName: 'scanType', width: 150 },
-    { field: 'execPipelineCount', headerName: 'execPipelineCount', type: 'number', width: 50 },
-  ];
+    { field: 'projectName', headerName: 'projectName', width: 150, editable: true },
+    { field: 'appName', headerName: 'appName', width: 200, editable: true },
+    { field: 'repository', headerName: 'repository', width: 150, editable: true },
+    { field: 'scanSpeedOptions', headerName: 'scanSpeedOptions', width: 75, editable: true },
+    { field: 'execCountChangeType', headerName: 'execCountChangeType', width: 50, type: 'number', editable: true },
+    { field: 'scanType', headerName: 'scanType', width: 150 , editable: true},
+    { field: 'execPipelineCount', headerName: 'execPipelineCount', type: 'number', width: 50, editable: true },
+    {
+      field: 'actions',
+      type: 'actions',
+      headerName: 'Actions',
+      width: 100,
+      cellClassName: 'actions',
+      getActions: ({ id }) => {
+        const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
 
-  let rows = []
+        if (isInEditMode) {
+          return [
+            <GridActionsCellItem
+              icon={<FaSave />}
+              label="Save"
+              sx={{
+                color: 'primary.main',
+              }}
+              onClick={handleSaveClick(id)}
+            />,
+            <GridActionsCellItem
+              icon={<FaBeer />}
+              label="Cancel"
+              className="textPrimary"
+              onClick={handleCancelClick(id)}
+              color="inherit"
+            />,
+          ];
+        }
+
+        return [
+          <GridActionsCellItem
+            icon={<FaEdit />}
+            label="Edit"
+            className="textPrimary"
+            onClick={handleEditClick(id)}
+            color="inherit"
+          />,
+          <GridActionsCellItem
+            icon={<FaTrash />}
+            label="Delete"
+            onClick={handleDeleteClick(id)}
+            color="inherit"
+          />,
+        ];
+      },
+    }
+  ];
 
   // auth
   const [isAuthenticated, userHasAuthenticated] = useState(false);
@@ -122,13 +193,13 @@ function App() {
           <DataGrid
             rows={todos}
             columns={columns}
+            editMode="row"
             initialState={{
               pagination: {
                 paginationModel: { page: 0, pageSize: 5 },
               },
             }}
             pageSizeOptions={[5, 10]}
-            checkboxSelection
           />
         </div>
         {isAuthenticated ?

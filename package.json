@@ -13,9 +13,12 @@
     "install:functions": "npm install azure-functions-core-tools@4.0.5095 --save-exact --unsafe-perm tru",
     "install:swa": "npm install -g @azure/static-web-apps-cli"
   },
-  "devDependencies": {},
   "workspaces": [
     "lib-openai/",
     "cli-openai/"
-  ]
+  ],
+  "dependencies": {
+    "react-icons": "^4.10.1",
+    "swa": "^0.1.1"
+  }
 }
